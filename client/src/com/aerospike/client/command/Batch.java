@@ -18,13 +18,8 @@ package com.aerospike.client.command;
 
 import java.util.List;
 
-import com.aerospike.client.AerospikeException;
-import com.aerospike.client.BatchRead;
-import com.aerospike.client.BatchRecord;
-import com.aerospike.client.Key;
-import com.aerospike.client.Operation;
+import com.aerospike.client.*;
 import com.aerospike.client.Record;
-import com.aerospike.client.ResultCode;
 import com.aerospike.client.cluster.Cluster;
 import com.aerospike.client.metrics.LatencyType;
 import com.aerospike.client.policy.BatchPolicy;
@@ -530,9 +525,17 @@ public final class Batch {
 			if (! ((batchPolicy.replica == Replica.SEQUENCE || batchPolicy.replica == Replica.PREFER_RACK) &&
 				   (parent == null || ! parent.isDone()))) {
 				// Perform regular retry to same node.
+				if ( parent != null)
+				{
+					Log.warn("Perform regular retry to same node " + sequenceAP + " policy = " + batchPolicy.replica + " " + parent.isDone());
+				} else {
+					Log.warn("Perform regular retry to sequence " + sequenceAP + " policy = " + batchPolicy.replica + " parent is null");
+				}
+
 				return true;
 			}
 			sequenceAP++;
+			Log.warn("Perform retry to same sequence " + sequenceAP + " policy = " + batchPolicy.replica + " " + parent.toString());
 
 			if (! timeout || batchPolicy.readModeSC != ReadModeSC.LINEARIZE) {
 				sequenceSC++;
